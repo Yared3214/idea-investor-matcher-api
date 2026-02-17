@@ -25,6 +25,8 @@ model User {
   otpHash         String?
   otpExpiresAt    DateTime?
   refreshToken    String?
+  resetPasswordToken String?
+  resetPasswordExpires DateTime? 
 
 
   createdAt       DateTime @default(now())
