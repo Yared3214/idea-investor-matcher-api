@@ -7,20 +7,38 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+
+
+
+model User {
+  id              String   @id @default(uuid())
+  fullName        String
+  email           String   @unique
+  passwordHash    String?
+  provider        AuthProvider
+
+  role            Role
+  isOnboarded     Boolean  @default(false)
+  isActive        Boolean @default(true)      
+
+  emailVerified   Boolean  @default(false)
+  otpHash         String?
+  otpExpiresAt    DateTime?
+  refreshToken    String?
+
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
 enum Role {
   ENTREPRENEUR
   INVESTOR
   ADMIN
 }
 
-model User {
-  id        String   @id @default(uuid())
-  name      String
-  email     String   @unique
-  password  String
-  role      Role
-  isActive  Boolean  @default(true)
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+enum AuthProvider {
+  LOCAL
+  GOOGLE
 }
