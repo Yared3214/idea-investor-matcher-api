@@ -1,0 +1,8 @@
+export enum Stage {
+  IDEA_STAGE = 'IDEA_STAGE',
+  PROTOTYPE = 'PROTOTYPE',
+  MVP = 'MVP',
+  EARLY_REVENUE = 'EARLY_REVENUE',
+  SCALING = 'SCALING',
+  SERIES_A = 'SERIES_A'
+}
