@@ -26,7 +26,7 @@ model User {
   resetPasswordToken String?
   resetPasswordExpires DateTime? 
   investorProfile        InvestorProfile?
-
+  ideas                  Idea[]  
 
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
@@ -46,6 +46,31 @@ model InvestorProfile {
   user             User       @relation(fields: [userId], references: [id])
 }
 
+
+model Idea {
+  id            String   @id @default(uuid())
+  founderId     String
+
+  startupName   String
+  pitchTitle    String
+  description   String
+
+  industry      Industry
+  stage         Stage
+
+  fundingAmount Float
+  roundType     String?
+  equityOffered Boolean
+
+  region        String
+
+  pitchDeckUrl  String?
+  pitchDeckId   String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  founder       User     @relation(fields: [founderId], references: [id])
+}
 
 
 

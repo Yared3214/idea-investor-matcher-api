@@ -47,6 +47,26 @@ CREATE TABLE "InvestorProfile" (
     CONSTRAINT "InvestorProfile_pkey" PRIMARY KEY ("id")
 );
 
+-- CreateTable
+CREATE TABLE "Idea" (
+    "id" TEXT NOT NULL,
+    "founderId" TEXT NOT NULL,
+    "startupName" TEXT NOT NULL,
+    "pitchTitle" TEXT NOT NULL,
+    "description" TEXT NOT NULL,
+    "industry" "Industry" NOT NULL,
+    "stage" "Stage" NOT NULL,
+    "fundingAmount" DOUBLE PRECISION NOT NULL,
+    "roundType" TEXT,
+    "equityOffered" BOOLEAN NOT NULL,
+    "region" TEXT NOT NULL,
+    "pitchDeckUrl" TEXT,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "Idea_pkey" PRIMARY KEY ("id")
+);
+
 -- CreateIndex
 CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
 
@@ -55,3 +75,6 @@ CREATE UNIQUE INDEX "InvestorProfile_userId_key" ON "InvestorProfile"("userId");
 
 -- AddForeignKey
 ALTER TABLE "InvestorProfile" ADD CONSTRAINT "InvestorProfile_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Idea" ADD CONSTRAINT "Idea_founderId_fkey" FOREIGN KEY ("founderId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
