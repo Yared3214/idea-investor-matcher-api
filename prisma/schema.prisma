@@ -7,7 +7,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-
 model User {
   id              String   @id @default(uuid())
   fullName        String
@@ -17,35 +16,43 @@ model User {
 
   role            Role
   isOnboarded     Boolean  @default(false)
-  isActive        Boolean @default(true)      
+  isActive        Boolean  @default(true)
 
   emailVerified   Boolean  @default(false)
   otpHash         String?
   otpExpiresAt    DateTime?
   refreshToken    String?
   resetPasswordToken String?
-  resetPasswordExpires DateTime? 
-  investorProfile        InvestorProfile?
-  ideas                  Idea[]  
+  resetPasswordExpires DateTime?
+
+  // Relations
+  investorProfile InvestorProfile?
+  ideas           Idea[]              @relation("FounderIdeas")
+  ideaViews       IdeaView[]          @relation("InvestorViews")
+  ideaInterests   IdeaInterest[]      @relation("InvestorInterests")
 
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
+
+  @@index([role])
+  @@index([isActive])
 }
 
 model InvestorProfile {
   id               String     @id @default(uuid())
   userId           String     @unique
+
   preferredStages  Stage[]
   industries       Industry[]
   minFunding       Float
   maxFunding       Float
   investmentThesis String
+
   createdAt        DateTime   @default(now())
   updatedAt        DateTime   @updatedAt
 
-  user             User       @relation(fields: [userId], references: [id])
+  user             User       @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
-
 
 model Idea {
   id            String   @id @default(uuid())
@@ -61,26 +68,68 @@ model Idea {
   fundingAmount Float
   roundType     String?
   equityOffered Boolean
-
   region        String
 
   pitchDeckUrl  String?
   pitchDeckId   String?
+
+  // Cached counters (IMPORTANT for performance)
+  viewsCount        Int      @default(0)
+  interestedCount   Int      @default(0)
+
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
+  // Relations
+  founder       User            @relation("FounderIdeas", fields: [founderId], references: [id], onDelete: Cascade)
+  views         IdeaView[]
+  interests     IdeaInterest[]
+
+  // Indexing for filtering & scaling
   @@index([industry])
   @@index([fundingAmount])
   @@index([stage])
   @@index([region])
   @@index([createdAt])
   @@index([industry, fundingAmount])
-
-  founder       User     @relation(fields: [founderId], references: [id])
+  @@index([founderId])
+  @@index([viewsCount])
+  @@index([interestedCount])
 }
 
+model IdeaView {
+  id          String   @id @default(uuid())
+  ideaId      String
+  investorId  String
+  createdAt   DateTime @default(now())
 
+  idea        Idea     @relation(fields: [ideaId], references: [id], onDelete: Cascade)
+  investor    User     @relation("InvestorViews", fields: [investorId], references: [id], onDelete: Cascade)
 
+  // Named composite unique key (VERY IMPORTANT)
+  @@unique([ideaId, investorId], name: "ideaId_investorId_view_unique")
+
+  @@index([ideaId])
+  @@index([investorId])
+  @@index([createdAt])
+}
+
+model IdeaInterest {
+  id          String   @id @default(uuid())
+  ideaId      String
+  investorId  String
+  createdAt   DateTime @default(now())
+
+  idea        Idea     @relation(fields: [ideaId], references: [id], onDelete: Cascade)
+  investor    User     @relation("InvestorInterests", fields: [investorId], references: [id], onDelete: Cascade)
+
+  // Named composite unique key
+  @@unique([ideaId, investorId], name: "ideaId_investorId_interest_unique")
+
+  @@index([ideaId])
+  @@index([investorId])
+  @@index([createdAt])
+}
 
 enum Role {
   ENTREPRENEUR
@@ -88,12 +137,10 @@ enum Role {
   ADMIN
 }
 
-
 enum AuthProvider {
   LOCAL
   GOOGLE
 }
-
 
 enum Stage {
   IDEA_STAGE
